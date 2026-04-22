@@ -425,6 +425,7 @@ function abrirModal(i) {
     fila('Tipo', r.tipo) +
     fila('Prioridad', r.prioridad) +
     fila('Días abierto', Math.round(r.diasAbierto)) +
+    (r.comentarios ? `<div class="modal-row"><span class="modal-k">Comentarios adicionales</span><span class="modal-v" style="color:var(--txt2);font-style:italic">${r.comentarios}</span></div>` : '') +
     sec('Acción correctiva') +
     fila('Responsable', r.respAccion || r.responsable) +
     fila('Acción inmediata', r.accionInm) +
