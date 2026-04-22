@@ -3,99 +3,171 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SGC · Seguimiento de Planes de Trabajo</title>
+<title>SGC · Planes de Trabajo</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #ffffff; --bg2: #f5f4f0; --bg3: #eeecea;
-    --txt: #1a1a18; --txt2: #6b6a64; --txt3: #9c9a92;
-    --border: rgba(0,0,0,0.10);
-    --teal: #1D9E75; --teal-bg: #E1F5EE; --teal-txt: #0F6E56;
-    --blue: #378ADD; --blue-bg: #E6F1FB; --blue-txt: #185FA5;
-    --amber: #EF9F27; --amber-bg: #FAEEDA; --amber-txt: #854F0B;
-    --red: #E24B4A; --red-bg: #FCEBEB; --red-txt: #A32D2D;
-    --gray-bg: #F1EFE8; --gray-txt: #5F5E5A;
-    --green: #639922; --green-bg: #EAF3DE; --green-txt: #3B6D11;
-    --radius: 8px; --radius-lg: 12px;
-  }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg2); color: var(--txt); font-size: 14px; }
-  header { background: var(--bg); border-bottom: 0.5px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
-  .logo { font-size: 15px; font-weight: 500; }
-  .logo span { color: var(--txt2); font-weight: 400; margin-left: 6px; font-size: 13px; }
-  #sync-info { font-size: 11px; color: var(--txt3); }
-  #sync-btn { font-size: 12px; padding: 5px 12px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--txt2); cursor: pointer; margin-left: 12px; }
-  #sync-btn:hover { background: var(--bg2); }
-  main { max-width: 1200px; margin: 0 auto; padding: 20px 16px; }
+/* ── Variables — editá solo este bloque para cambiar el diseño ── */
+:root {
+  --bg:        #ffffff;
+  --bg2:       #f5f4f0;
+  --bg3:       #eeecea;
+  --txt:       #1a1a18;
+  --txt2:      #6b6a64;
+  --txt3:      #9c9a92;
+  --border:    rgba(0,0,0,0.09);
+  --accent:    #378ADD;
+  --radius:    8px;
+  --radius-lg: 12px;
+  /* Colores de estado */
+  --c-gestion-bg:  #E1F5EE; --c-gestion-txt:  #0F6E56; --c-gestion:  #1D9E75;
+  --c-abierta-bg:  #E6F1FB; --c-abierta-txt:  #185FA5; --c-abierta:  #378ADD;
+  --c-vencida-bg:  #FCEBEB; --c-vencida-txt:  #A32D2D; --c-vencida:  #E24B4A;
+  --c-cerrada-bg:  #EAF3DE; --c-cerrada-txt:  #3B6D11; --c-cerrada:  #639922;
+  --c-sinac-bg:    #F1EFE8; --c-sinac-txt:    #5F5E5A; --c-sinac:    #888780;
+  /* Prioridad */
+  --p-alta:   #E24B4A;
+  --p-media:  #EF9F27;
+  --p-baja:   #639922;
+}
 
-  /* Stats */
-  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 18px; }
-  .stat { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 12px 14px; }
-  .stat-n { font-size: 24px; font-weight: 500; line-height: 1.1; }
-  .stat-l { font-size: 11px; color: var(--txt2); margin-top: 3px; }
+/* ── Reset y base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg2); color: var(--txt); font-size: 14px; min-height: 100vh; }
 
-  /* Toolbar */
-  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 10px 14px; margin-bottom: 14px; }
-  .toolbar label { font-size: 12px; color: var(--txt2); white-space: nowrap; }
-  .toolbar select, .toolbar input { font-size: 12px; padding: 5px 10px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--txt); height: 30px; outline: none; }
-  .toolbar select:focus { border-color: var(--blue); }
+/* ── Header ───────────────────────────────────────────────── */
+header {
+  background: var(--bg);
+  border-bottom: 0.5px solid var(--border);
+  padding: 0 20px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 50;
+}
+.logo { font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 10px; }
+.logo-badge { background: var(--c-gestion-bg); color: var(--c-gestion-txt); font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 10px; }
+.header-right { display: flex; align-items: center; gap: 10px; }
+#sync-info { font-size: 11px; color: var(--txt3); }
+.btn { font-size: 12px; padding: 5px 12px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--txt2); cursor: pointer; transition: background .12s; white-space: nowrap; }
+.btn:hover { background: var(--bg2); }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary:hover { opacity: .88; }
 
-  /* Table */
-  .table-wrap { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
-  table { width: 100%; border-collapse: collapse; min-width: 800px; }
-  thead th { background: var(--bg2); padding: 9px 12px; font-size: 11px; font-weight: 500; color: var(--txt2); text-align: left; border-bottom: 0.5px solid var(--border); white-space: nowrap; cursor: pointer; user-select: none; }
-  thead th:hover { background: var(--bg3); }
-  thead th.sorted-asc::after { content: ' ↑'; }
-  thead th.sorted-desc::after { content: ' ↓'; }
-  tbody tr { border-bottom: 0.5px solid var(--border); cursor: pointer; transition: background .1s; }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: var(--bg2); }
-  td { padding: 9px 12px; vertical-align: middle; }
-  .id-cell { font-size: 11px; font-weight: 500; color: var(--txt2); white-space: nowrap; }
-  .area-cell { font-size: 11px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; white-space: nowrap; }
-  .bar-wrap { width: 120px; background: var(--bg2); border-radius: 4px; height: 16px; position: relative; border: 0.5px solid var(--border); overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 4px; position: absolute; left: 0; top: 0; }
-  .bar-lbl { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); font-size: 10px; font-weight: 500; }
-  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
+/* ── Layout ───────────────────────────────────────────────── */
+main { max-width: 1280px; margin: 0 auto; padding: 18px 16px 40px; }
 
-  /* Modal */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; align-items: center; justify-content: center; }
-  .modal-overlay.open { display: flex; }
-  .modal { background: var(--bg); border-radius: var(--radius-lg); border: 0.5px solid var(--border); padding: 22px; max-width: 520px; width: 90%; max-height: 85vh; overflow-y: auto; }
-  .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-  .modal-id { font-size: 16px; font-weight: 500; }
-  .modal-close { background: none; border: 0.5px solid var(--border); border-radius: var(--radius); padding: 3px 10px; cursor: pointer; font-size: 12px; color: var(--txt2); }
-  .modal-row { display: flex; gap: 10px; margin-bottom: 10px; font-size: 13px; }
-  .modal-key { color: var(--txt2); min-width: 140px; flex-shrink: 0; font-size: 12px; }
-  .modal-val { color: var(--txt); line-height: 1.5; }
-  .modal-section { font-size: 11px; font-weight: 500; color: var(--txt3); text-transform: uppercase; letter-spacing: .06em; margin: 14px 0 8px; border-top: 0.5px solid var(--border); padding-top: 12px; }
+/* ── Stats ────────────────────────────────────────────────── */
+.stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 16px; }
+.stat { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 12px 14px; }
+.stat-n { font-size: 26px; font-weight: 500; line-height: 1.1; }
+.stat-l { font-size: 11px; color: var(--txt2); margin-top: 3px; }
 
-  /* Loading / error */
-  .state-msg { text-align: center; padding: 48px; color: var(--txt2); font-size: 13px; }
-  .spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 12px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .empty { text-align: center; padding: 36px; color: var(--txt3); font-size: 13px; }
-  @media (max-width: 600px) { .stats { grid-template-columns: repeat(3, 1fr); } }
+/* ── Toolbar ──────────────────────────────────────────────── */
+.toolbar {
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  background: var(--bg); border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg); padding: 10px 14px; margin-bottom: 14px;
+}
+.toolbar label { font-size: 11px; color: var(--txt3); white-space: nowrap; text-transform: uppercase; letter-spacing: .05em; }
+.toolbar select, .toolbar input {
+  font-size: 12px; padding: 5px 10px;
+  border: 0.5px solid var(--border); border-radius: var(--radius);
+  background: var(--bg); color: var(--txt); height: 30px; outline: none;
+}
+.toolbar select:focus, .toolbar input:focus { border-color: var(--accent); }
+.toolbar input[type=text] { min-width: 170px; }
+.toolbar .sep { width: 0.5px; height: 20px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
+
+/* ── Tabla ────────────────────────────────────────────────── */
+.table-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 860px; font-size: 12px; }
+thead th {
+  background: var(--bg2); padding: 9px 12px;
+  font-size: 10px; font-weight: 500; color: var(--txt2);
+  text-align: left; border-bottom: 0.5px solid var(--border);
+  white-space: nowrap; cursor: pointer; user-select: none;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+thead th:hover { background: var(--bg3); }
+thead th.s-asc::after  { content: ' ↑'; }
+thead th.s-desc::after { content: ' ↓'; }
+tbody tr { border-bottom: 0.5px solid var(--border); cursor: pointer; transition: background .1s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg2); }
+td { padding: 9px 12px; vertical-align: middle; }
+
+.cell-id   { font-size: 11px; font-weight: 500; color: var(--txt2); white-space: nowrap; }
+.cell-area { font-size: 11px; max-width: 145px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cell-resp { font-size: 12px; white-space: nowrap; }
+
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; white-space: nowrap; }
+
+.dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 5px; flex-shrink: 0; }
+
+/* Barras */
+.bar-wrap { background: var(--bg2); border-radius: 4px; height: 16px; position: relative; border: 0.5px solid var(--border); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; position: absolute; left: 0; top: 0; }
+.bar-lbl  { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); font-size: 10px; font-weight: 500; }
+
+/* ── Estado mensajes ──────────────────────────────────────── */
+.state-msg { text-align: center; padding: 52px 20px; color: var(--txt2); font-size: 13px; }
+.spinner { width: 22px; height: 22px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .75s linear infinite; margin: 0 auto 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty-msg { text-align: center; padding: 36px; color: var(--txt3); font-size: 13px; }
+
+/* ── Modal ────────────────────────────────────────────────── */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.38); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
+.overlay.open { display: flex; }
+.modal {
+  background: var(--bg); border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border); padding: 22px;
+  max-width: 540px; width: 100%; max-height: 88vh; overflow-y: auto;
+}
+.modal-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.modal-id { font-size: 16px; font-weight: 500; }
+.modal-sec { font-size: 10px; font-weight: 500; color: var(--txt3); text-transform: uppercase; letter-spacing: .07em; margin: 14px 0 8px; padding-top: 12px; border-top: 0.5px solid var(--border); }
+.modal-row { display: flex; gap: 10px; margin-bottom: 9px; }
+.modal-k { color: var(--txt2); min-width: 145px; flex-shrink: 0; font-size: 12px; padding-top: 1px; }
+.modal-v { color: var(--txt); font-size: 12px; line-height: 1.6; }
+.modal-v a { color: var(--accent); text-decoration: none; }
+.modal-v a:hover { text-decoration: underline; }
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .stats { grid-template-columns: repeat(3, 1fr); }
+  .stat-n { font-size: 20px; }
+  header { padding: 0 12px; }
+  main { padding: 12px 10px 32px; }
+}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">SGC <span>Seguimiento de Planes de Trabajo</span></div>
-  <div style="display:flex;align-items:center;gap:8px">
-    <span id="sync-info">Sin datos</span>
-    <button id="sync-btn" onclick="cargarDatos()">↻ Actualizar</button>
+  <div class="logo">
+    SGC
+    <span class="logo-badge">Planes de Trabajo</span>
+  </div>
+  <div class="header-right">
+    <span id="sync-info">Cargando…</span>
+    <button class="btn" onclick="cargarDatos()">↻ Actualizar</button>
   </div>
 </header>
 
 <main>
+
+  <!-- Stats -->
   <div class="stats" id="stats">
     <div class="stat"><div class="spinner"></div></div>
+    <div class="stat"></div><div class="stat"></div><div class="stat"></div><div class="stat"></div>
   </div>
 
+  <!-- Toolbar -->
   <div class="toolbar">
     <label>Área</label>
     <select id="fArea" onchange="render()"><option value="">Todas</option></select>
+    <div class="sep"></div>
     <label>Tipo</label>
     <select id="fTipo" onchange="render()">
       <option value="">Todos</option>
@@ -103,6 +175,7 @@
       <option>Observación</option>
       <option>Oportunidad de mejora</option>
     </select>
+    <div class="sep"></div>
     <label>Estado</label>
     <select id="fEstado" onchange="render()">
       <option value="">Todos</option>
@@ -112,6 +185,7 @@
       <option>Vencida</option>
       <option>Cerrada</option>
     </select>
+    <div class="sep"></div>
     <label>Prioridad</label>
     <select id="fPrio" onchange="render()">
       <option value="">Todas</option>
@@ -119,190 +193,209 @@
       <option>Media</option>
       <option>Baja</option>
     </select>
-    <input type="text" id="fBuscar" placeholder="Buscar ID o responsable…" oninput="render()" style="min-width:180px">
+    <div class="sep"></div>
+    <input type="text" id="fBuscar" placeholder="Buscar ID, responsable o situación…" oninput="render()">
   </div>
 
-  <div class="table-wrap">
-    <div id="loading" class="state-msg"><div class="spinner"></div>Cargando datos desde el Sheet…</div>
-    <div id="error"  class="state-msg" style="display:none;color:#A32D2D"></div>
-    <div id="table-container" style="display:none;overflow-x:auto">
-      <table>
-        <thead>
-          <tr>
-            <th onclick="sortBy('id')">ID</th>
-            <th onclick="sortBy('area')">Área</th>
-            <th onclick="sortBy('responsable')">Responsable</th>
-            <th onclick="sortBy('estado')">Estado</th>
-            <th onclick="sortBy('prioridad')">Prioridad</th>
-            <th onclick="sortBy('compromiso')" style="text-align:center">Compromiso</th>
-            <th onclick="sortBy('diasAbierto')" style="text-align:center">Días abierto</th>
-            <th>Avance estimado</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-      <div id="empty" class="empty" style="display:none">Sin resultados para los filtros seleccionados.</div>
+  <!-- Tabla -->
+  <div class="table-card">
+    <div id="loading" class="state-msg">
+      <div class="spinner"></div>
+      Conectando con el Sheet…
+    </div>
+    <div id="err" class="state-msg" style="display:none;color:#A32D2D"></div>
+    <div id="tbl-wrap" style="display:none">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortBy('id')">ID</th>
+              <th onclick="sortBy('area')">Área</th>
+              <th onclick="sortBy('responsable')">Responsable</th>
+              <th onclick="sortBy('tipo')">Tipo</th>
+              <th onclick="sortBy('estado')">Estado</th>
+              <th onclick="sortBy('prioridad')">Prioridad</th>
+              <th onclick="sortBy('compromiso')" style="text-align:center">Compromiso</th>
+              <th onclick="sortBy('diasAbierto')" style="text-align:center">Días abierto</th>
+              <th>Avance estimado</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div id="empty" class="empty-msg" style="display:none">Sin resultados para los filtros seleccionados.</div>
     </div>
   </div>
+
 </main>
 
-<div class="modal-overlay" id="modal" onclick="cerrarModal(event)">
+<!-- Modal detalle -->
+<div class="overlay" id="overlay" onclick="cerrarModal(event)">
   <div class="modal">
-    <div class="modal-header">
-      <span class="modal-id" id="modal-id"></span>
-      <button class="modal-close" onclick="cerrarModal()">✕ cerrar</button>
+    <div class="modal-head">
+      <span class="modal-id" id="m-id"></span>
+      <button class="btn" onclick="cerrarModal()">✕ cerrar</button>
     </div>
-    <div id="modal-body"></div>
+    <div id="m-body"></div>
   </div>
 </div>
 
 <script>
-// ─────────────────────────────────────────────────────────────
-//  CONFIGURACIÓN — pegá acá la URL de tu Web App
-// ─────────────────────────────────────────────────────────────
-const API_URL = 'https://script.google.com/macros/s/AKfycbwtgtyyzysA9uBMfLZJ9L_UrZ1o7WFuxt36Z1OLhBzEKPb8JyQA6-cHWvuiIcoi8CTUKA/exec';
-// ─────────────────────────────────────────────────────────────
-
-const COLOR = {
-  estado: { 'En gestión':'#1D9E75','Abierta':'#378ADD','Sin Acción':'#888780','Vencida':'#E24B4A','Cerrada':'#639922' },
-  estadoBg: { 'En gestión':'#E1F5EE','Abierta':'#E6F1FB','Sin Acción':'#F1EFE8','Vencida':'#FCEBEB','Cerrada':'#EAF3DE' },
-  estadoTxt: { 'En gestión':'#0F6E56','Abierta':'#185FA5','Sin Acción':'#5F5E5A','Vencida':'#A32D2D','Cerrada':'#3B6D11' },
-  prio: { 'Alta':'#E24B4A','Media':'#EF9F27','Baja':'#639922' },
-};
-
+// ── Estado ────────────────────────────────────────────────────
 let DATOS = [];
 let sortCol = 'diasAbierto', sortDir = -1;
 
-async function cargarDatos() {
-  document.getElementById('loading').style.display = 'block';
-  document.getElementById('error').style.display   = 'none';
-  document.getElementById('table-container').style.display = 'none';
-  document.getElementById('sync-info').textContent = 'Actualizando…';
+// ── Colores por estado ────────────────────────────────────────
+const EST = {
+  'En gestión': { bg:'#E1F5EE', txt:'#0F6E56', bar:'#1D9E75' },
+  'Abierta':    { bg:'#E6F1FB', txt:'#185FA5', bar:'#378ADD' },
+  'Vencida':    { bg:'#FCEBEB', txt:'#A32D2D', bar:'#E24B4A' },
+  'Cerrada':    { bg:'#EAF3DE', txt:'#3B6D11', bar:'#639922' },
+  'Sin Acción': { bg:'#F1EFE8', txt:'#5F5E5A', bar:'#888780' },
+};
+const defEst = { bg:'#F1EFE8', txt:'#5F5E5A', bar:'#888780' };
+const PRIO   = { 'Alta':'#E24B4A', 'Media':'#EF9F27', 'Baja':'#639922' };
 
-  try {
-    const res  = await fetch(API_URL + '?_t=' + Date.now());
-    const json = await res.json();
-    DATOS = json.registros || [];
-
-    // Poblar filtro de áreas
-    const areas = [...new Set(DATOS.map(r => r.area))].filter(Boolean).sort();
-    const sel = document.getElementById('fArea');
-    sel.innerHTML = '<option value="">Todas</option>';
-    areas.forEach(a => { const o = document.createElement('option'); o.value = o.textContent = a; sel.appendChild(o); });
-
-    const ts = new Date(json.actualizacion).toLocaleString('es-AR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
-    document.getElementById('sync-info').textContent = 'Actualizado ' + ts;
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('table-container').style.display = 'block';
-    render();
-  } catch(e) {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('error').style.display   = 'block';
-    document.getElementById('error').textContent     = '⚠ No se pudo conectar con el Sheet. Revisá la URL de la Web App o los permisos. (' + e.message + ')';
-    document.getElementById('sync-info').textContent = 'Error de conexión';
-  }
-}
-
-function hoy() { const d = new Date(); d.setHours(0,0,0,0); return d; }
-function parseISO(s) { if (!s) return null; const d = new Date(s); d.setHours(0,0,0,0); return isNaN(d)?null:d; }
-function fmtFecha(s) { const d = parseISO(s); if (!d) return '—'; return d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+// ── Helpers ───────────────────────────────────────────────────
+const hoy = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
+const parseISO = s => { if (!s) return null; const d = new Date(s); d.setHours(0,0,0,0); return isNaN(d)?null:d; };
+const fmtFecha = s => { const d = parseISO(s); if (!d) return '—'; return d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}); };
 
 function calcEstado(r) {
   if (r.estado === 'Cerrada') return 'Cerrada';
-  const hoyD = hoy(), venc = parseISO(r.vencCalc);
-  if (venc && hoyD > venc) return 'Vencida';
+  const v = parseISO(r.vencCalc);
+  if (v && hoy() > v) return 'Vencida';
   return r.estado || 'Sin datos';
 }
 
 function calcPct(r) {
   if (r.estado === 'Cerrada') return 100;
-  const inicio = parseISO(r.compromiso ? null : null); // usamos diasAbierto como proxy
-  if (!r.compromiso || !r.vencCalc) return 0;
-  const comp   = parseISO(r.compromiso);
-  const venc   = parseISO(r.vencCalc);
-  const hoyD   = hoy();
+  const comp = parseISO(r.compromiso), venc = parseISO(r.vencCalc);
   if (!comp || !venc) return 0;
-  const total   = venc - comp; if (total <= 0) return 0;
-  const elapsed = Math.min(hoyD, venc) - comp;
-  return Math.max(0, Math.min(99, Math.round(elapsed / total * 100)));
+  const total = venc - comp; if (total <= 0) return 0;
+  return Math.max(0, Math.min(99, Math.round((Math.min(hoy(), venc) - comp) / total * 100)));
 }
 
+// ── CONFIGURACIÓN ────────────────────────────────────────────
+// Pegá acá la URL de tu Web App de Apps Script
+const API_URL = 'https://script.google.com/macros/s/AKfycbwtgtyyzysA9uBMfLZJ9L_UrZ1o7WFuxt36Z1OLhBzEKPb8JyQA6-cHWvuiIcoi8CTUKA/exec';
+
+// ── Carga de datos via fetch() (versión GitHub Pages) ─────────
+async function cargarDatos() {
+  document.getElementById('loading').style.display  = 'block';
+  document.getElementById('err').style.display      = 'none';
+  document.getElementById('tbl-wrap').style.display = 'none';
+  document.getElementById('sync-info').textContent  = 'Actualizando…';
+
+  try {
+    const res  = await fetch(API_URL + '?_t=' + Date.now(), { redirect: 'follow' });
+    const text = await res.text();
+
+    // Detectar si llegó HTML de login en vez de JSON
+    if (text.trim().startsWith('<')) {
+      throw new Error('La Web App devolvió HTML en vez de JSON. En Apps Script: Implementar → Administrar implementaciones → Quién puede acceder: "Cualquier persona" (no "con cuenta de Google").');
+    }
+
+    const data = JSON.parse(text);
+    DATOS = data.registros || [];
+
+    const areas = [...new Set(DATOS.map(r => r.area))].filter(Boolean).sort();
+    const sel = document.getElementById('fArea');
+    sel.innerHTML = '<option value="">Todas</option>';
+    areas.forEach(a => { const o = document.createElement('option'); o.value = o.textContent = a; sel.appendChild(o); });
+
+    const ts = new Date(data.actualizacion).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    document.getElementById('sync-info').textContent  = 'Act. ' + ts;
+    document.getElementById('loading').style.display  = 'none';
+    document.getElementById('tbl-wrap').style.display = 'block';
+    render();
+
+  } catch(e) {
+    mostrarError(e.message);
+  }
+}
+
+function mostrarError(msg) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('err').style.display     = 'block';
+  document.getElementById('err').textContent       = '⚠ ' + msg;
+  document.getElementById('sync-info').textContent = 'Error';
+}
+
+// ── Filtros ───────────────────────────────────────────────────
 function filtrados() {
   const fA = document.getElementById('fArea').value;
   const fT = document.getElementById('fTipo').value;
   const fE = document.getElementById('fEstado').value;
   const fP = document.getElementById('fPrio').value;
   const fB = document.getElementById('fBuscar').value.toLowerCase();
-
   return DATOS.filter(r => {
     const est = calcEstado(r);
     return (!fA || r.area === fA)
         && (!fT || r.tipo === fT)
         && (!fE || est === fE)
         && (!fP || r.prioridad === fP)
-        && (!fB || r.id.toLowerCase().includes(fB) || r.responsable.toLowerCase().includes(fB) || r.situacion.toLowerCase().includes(fB));
+        && (!fB || r.id.toLowerCase().includes(fB) || (r.responsable||'').toLowerCase().includes(fB) || (r.situacion||'').toLowerCase().includes(fB));
   });
 }
 
+// ── Ordenamiento ──────────────────────────────────────────────
 function sortBy(col) {
   if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = 1; }
   document.querySelectorAll('thead th').forEach(th => th.className = '');
-  const idx = ['id','area','responsable','estado','prioridad','compromiso','diasAbierto'].indexOf(col);
-  if (idx >= 0) document.querySelectorAll('thead th')[idx].className = sortDir === 1 ? 'sorted-asc' : 'sorted-desc';
+  const cols = ['id','area','responsable','tipo','estado','prioridad','compromiso','diasAbierto'];
+  const idx = cols.indexOf(col);
+  if (idx >= 0) document.querySelectorAll('thead th')[idx].className = sortDir === 1 ? 's-asc' : 's-desc';
   render();
 }
 
+// ── Render principal ──────────────────────────────────────────
 function render() {
   let data = filtrados();
-  data.sort((a,b) => {
-    let va = a[sortCol] || '', vb = b[sortCol] || '';
-    if (sortCol === 'diasAbierto') { va = Number(va); vb = Number(vb); }
-    if (va < vb) return -sortDir; if (va > vb) return sortDir; return 0;
+  data.sort((a, b) => {
+    let va = a[sortCol] ?? '', vb = b[sortCol] ?? '';
+    if (sortCol === 'diasAbierto') { va = +va; vb = +vb; }
+    return va < vb ? -sortDir : va > vb ? sortDir : 0;
   });
 
   // Stats
-  const total    = data.length;
-  const gestion  = data.filter(r => calcEstado(r) === 'En gestión').length;
-  const abiertas = data.filter(r => calcEstado(r) === 'Abierta').length;
-  const vencidas = data.filter(r => calcEstado(r) === 'Vencida').length;
-  const cerradas = data.filter(r => calcEstado(r) === 'Cerrada').length;
+  const cnt = est => data.filter(r => calcEstado(r) === est).length;
   document.getElementById('stats').innerHTML = [
-    { n: total,    l: 'Total',       c: 'var(--txt)' },
-    { n: gestion,  l: 'En gestión',  c: '#0F6E56'    },
-    { n: abiertas, l: 'Abiertas',    c: '#185FA5'    },
-    { n: vencidas, l: 'Vencidas',    c: '#A32D2D'    },
-    { n: cerradas, l: 'Cerradas',    c: '#3B6D11'    },
+    { n: data.length,      l: 'Total',       c: 'var(--txt)'        },
+    { n: cnt('En gestión'),l: 'En gestión',  c: 'var(--c-gestion-txt)' },
+    { n: cnt('Abierta'),   l: 'Abiertas',    c: 'var(--c-abierta-txt)' },
+    { n: cnt('Vencida'),   l: 'Vencidas',    c: 'var(--c-vencida-txt)' },
+    { n: cnt('Cerrada'),   l: 'Cerradas',    c: 'var(--c-cerrada-txt)' },
   ].map(s => `<div class="stat"><div class="stat-n" style="color:${s.c}">${s.n}</div><div class="stat-l">${s.l}</div></div>`).join('');
 
-  const maxDias = Math.max(...data.map(r => r.diasAbierto), 1);
-  const tbody   = document.getElementById('tbody');
+  // Filas
+  const maxDias = Math.max(...data.map(r => Math.round(r.diasAbierto)), 1);
   document.getElementById('empty').style.display = data.length ? 'none' : 'block';
-
-  tbody.innerHTML = data.map((r, i) => {
-    const est     = calcEstado(r);
-    const pct     = calcPct(r);
-    const color   = COLOR.estado[est]    || '#888';
-    const bg      = COLOR.estadoBg[est]  || '#eee';
-    const txt     = COLOR.estadoTxt[est] || '#555';
-    const pctDias = Math.round(r.diasAbierto / maxDias * 100);
-    const pColor  = COLOR.prio[r.prioridad] || '#888';
+  document.getElementById('tbody').innerHTML = data.map((r, i) => {
+    const est   = calcEstado(r);
+    const c     = EST[est] || defEst;
+    const pct   = calcPct(r);
+    const pColor= PRIO[r.prioridad] || '#888';
+    const dPct  = Math.round(r.diasAbierto / maxDias * 100);
+    const barTxt= pct > 55 ? '#fff' : c.bar;
     return `<tr onclick="abrirModal(${i})">
-      <td class="id-cell">${r.id}</td>
-      <td class="area-cell" title="${r.area}">${r.area}</td>
-      <td style="font-size:12px;white-space:nowrap">${(r.responsable||'').split(' ').slice(0,2).join(' ')}</td>
-      <td><span class="badge" style="background:${bg};color:${txt}">${est}</span></td>
+      <td class="cell-id">${r.id}</td>
+      <td class="cell-area" title="${r.area}">${r.area}</td>
+      <td class="cell-resp">${(r.responsable||'').split(' ').slice(0,2).join(' ')}</td>
+      <td style="font-size:11px;color:var(--txt2);white-space:nowrap">${r.tipo||'—'}</td>
+      <td><span class="badge" style="background:${c.bg};color:${c.txt}">${est}</span></td>
       <td><span class="dot" style="background:${pColor}"></span><span style="font-size:11px">${r.prioridad||'—'}</span></td>
       <td style="text-align:center;font-size:11px">${fmtFecha(r.compromiso)}</td>
       <td style="text-align:center">
-        <div class="bar-wrap" style="width:70px;display:inline-block">
-          <div class="bar-fill" style="width:${pctDias}%;background:${color};opacity:.6"></div>
-          <span class="bar-lbl" style="color:var(--txt2)">${r.diasAbierto}d</span>
+        <div class="bar-wrap" style="width:64px;display:inline-block">
+          <div class="bar-fill" style="width:${dPct}%;background:${c.bar};opacity:.55"></div>
+          <span class="bar-lbl" style="color:var(--txt2)">${Math.round(r.diasAbierto)}d</span>
         </div>
       </td>
       <td>
-        <div class="bar-wrap">
-          <div class="bar-fill" style="width:${pct}%;background:${color}"></div>
-          <span class="bar-lbl" style="color:${pct>55?'#fff':color}">${pct}%</span>
+        <div class="bar-wrap" style="min-width:100px">
+          <div class="bar-fill" style="width:${pct}%;background:${c.bar}"></div>
+          <span class="bar-lbl" style="color:${barTxt}">${pct}%</span>
         </div>
       </td>
     </tr>`;
@@ -311,45 +404,52 @@ function render() {
   window._data = data;
 }
 
+// ── Modal ─────────────────────────────────────────────────────
 function abrirModal(i) {
   const r   = window._data[i];
   const est = calcEstado(r);
-  const color = COLOR.estadoBg[est] || '#eee';
-  const txt   = COLOR.estadoTxt[est] || '#555';
-
-  document.getElementById('modal-id').textContent = r.id;
-  document.getElementById('modal-body').innerHTML = `
-    <div class="modal-section">Detección</div>
-    <div class="modal-row"><span class="modal-key">Área</span><span class="modal-val">${r.area||'—'}</span></div>
-    <div class="modal-row"><span class="modal-key">Tipo</span><span class="modal-val">${r.tipo||'—'}</span></div>
-    <div class="modal-row"><span class="modal-key">Situación</span><span class="modal-val">${r.situacion||'—'}</span></div>
-    <div class="modal-row"><span class="modal-key">Prioridad</span><span class="modal-val">${r.prioridad||'—'}</span></div>
-    <div class="modal-row"><span class="modal-key">Días abierto</span><span class="modal-val">${r.diasAbierto}</span></div>
-
-    <div class="modal-section">Acción correctiva</div>
-    <div class="modal-row"><span class="modal-key">Responsable</span><span class="modal-val">${r.respAccion||r.responsable||'—'}</span></div>
-    <div class="modal-row"><span class="modal-key">Acción inmediata</span><span class="modal-val">${r.accionInm||'—'}</span></div>
-    <div class="modal-row"><span class="modal-key">Acción definitiva</span><span class="modal-val">${r.accionDef||'—'}</span></div>
-    <div class="modal-row"><span class="modal-key">Causa raíz</span><span class="modal-val">${r.causa||'—'}</span></div>
-
-    <div class="modal-section">Seguimiento</div>
-    <div class="modal-row"><span class="modal-key">Estado</span><span class="modal-val"><span class="badge" style="background:${color};color:${txt}">${est}</span></span></div>
-    <div class="modal-row"><span class="modal-key">Fecha compromiso</span><span class="modal-val">${fmtFecha(r.compromiso)}</span></div>
-    <div class="modal-row"><span class="modal-key">Fecha venc. calculada</span><span class="modal-val">${fmtFecha(r.vencCalc)}</span></div>
-    <div class="modal-row"><span class="modal-key">Fecha de cierre</span><span class="modal-val">${fmtFecha(r.fechaCierre)}</span></div>
-    ${r.evidencia ? `<div class="modal-row"><span class="modal-key">Evidencia</span><span class="modal-val"><a href="${r.evidencia}" target="_blank" style="color:var(--blue)">Ver link ↗</a></span></div>` : ''}
-    ${r.validacion ? `<div class="modal-row"><span class="modal-key">Validación SGC</span><span class="modal-val">${r.validacion}</span></div>` : ''}
-    ${r.observ ? `<div class="modal-row"><span class="modal-key">Observaciones</span><span class="modal-val">${r.observ}</span></div>` : ''}
-  `;
-  document.getElementById('modal').classList.add('open');
+  const c   = EST[est] || defEst;
+  document.getElementById('m-id').textContent = r.id;
+  const fila = (k, v) => v ? `<div class="modal-row"><span class="modal-k">${k}</span><span class="modal-v">${v}</span></div>` : '';
+  const sec  = t => `<div class="modal-sec">${t}</div>`;
+  const situacionBlock = r.situacion
+    ? `<div style="background:var(--bg2);border-left:3px solid ${c.bar};border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--txt);line-height:1.6">
+        <div style="font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">¿Qué ocurrió?</div>
+        ${r.situacion}
+       </div>`
+    : '';
+  document.getElementById('m-body').innerHTML =
+    situacionBlock +
+    sec('Detección') +
+    fila('Área', r.area) +
+    fila('Tipo', r.tipo) +
+    fila('Prioridad', r.prioridad) +
+    fila('Días abierto', Math.round(r.diasAbierto)) +
+    sec('Acción correctiva') +
+    fila('Responsable', r.respAccion || r.responsable) +
+    fila('Acción inmediata', r.accionInm) +
+    fila('Acción definitiva', r.accionDef) +
+    fila('Causa raíz', r.causa) +
+    sec('Seguimiento') +
+    `<div class="modal-row"><span class="modal-k">Estado</span><span class="modal-v"><span class="badge" style="background:${c.bg};color:${c.txt}">${est}</span></span></div>` +
+    fila('Fecha compromiso', fmtFecha(r.compromiso)) +
+    fila('Fecha venc. calculada', fmtFecha(r.vencCalc)) +
+    fila('Fecha de cierre', fmtFecha(r.fechaCierre)) +
+    (r.evidencia && r.evidencia.startsWith('http')
+      ? `<div class="modal-row"><span class="modal-k">Evidencia</span><span class="modal-v"><a href="${r.evidencia}" target="_blank" rel="noopener">Abrir carpeta en Drive ↗</a></span></div>`
+      : r.evidencia
+        ? `<div class="modal-row"><span class="modal-k">Evidencia</span><span class="modal-v" style="color:var(--txt2)">${r.evidencia}</span></div>`
+        : '') +
+    fila('Validación SGC', r.validacion) +
+    fila('Observaciones', r.observ);
+  document.getElementById('overlay').classList.add('open');
 }
-
 function cerrarModal(e) {
-  if (!e || e.target === document.getElementById('modal'))
-    document.getElementById('modal').classList.remove('open');
+  if (!e || e.target === document.getElementById('overlay'))
+    document.getElementById('overlay').classList.remove('open');
 }
 
-// Auto-refresh cada 5 minutos
+// ── Inicio y auto-refresh ─────────────────────────────────────
 cargarDatos();
 setInterval(cargarDatos, 5 * 60 * 1000);
 </script>
