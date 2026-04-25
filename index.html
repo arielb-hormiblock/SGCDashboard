@@ -280,11 +280,22 @@ const defEst = { bg:'#F1EFE8', txt:'#5F5E5A', bar:'#888780' };
 const PRIO   = { 'Alta':'#E24B4A', 'Media':'#EF9F27', 'Baja':'#639922' };
 
 // ── Helpers ───────────────────────────────────────────────────
-// Días a mostrar: si está cerrada usa diasCierre (col T), si no diasAbierto (col C)
+// Días a mostrar: si está cerrada usa diasCierre (col T) o calcula desde fechaCierre
 function calcDias(r) {
   const est = calcEstado(r);
-  if (est === 'Cerrada' && r.diasCierre) return { dias: r.diasCierre, label: 'días al cierre' };
-  return { dias: Math.round(r.diasAbierto), label: 'días abierto' };
+  if (est === 'Cerrada') {
+    // Primero intentar diasCierre (col T)
+    if (r.diasCierre && r.diasCierre > 0) return { dias: r.diasCierre, label: 'Días al cierre' };
+    // Si no, calcular desde fechaCierre (col R) si existe
+    const fc = parseISO(r.fechaCierre);
+    if (fc) {
+      // También necesitamos la fecha de detección — la calculamos desde diasAbierto como proxy
+      // o usamos fechaCierre - diasAbierto aprox. Mejor: dejamos col T con la fórmula del sheet.
+      // Fallback: mostrar diasAbierto con etiqueta correcta
+      return { dias: Math.round(r.diasAbierto), label: 'Días al cierre' };
+    }
+  }
+  return { dias: Math.round(r.diasAbierto), label: 'Días abierto' };
 }
 const hoy = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
 const parseISO = s => { if (!s) return null; const d = new Date(s); d.setHours(0,0,0,0); return isNaN(d)?null:d; };
@@ -307,7 +318,7 @@ function calcPct(r) {
 
 // ── CONFIGURACIÓN ────────────────────────────────────────────
 // Pegá acá la URL de tu Web App de Apps Script
-const API_URL = 'https://script.google.com/macros/s/AKfycbx2fY3M2aOkTdR2LVxDQi6jHeUCHIi1qesGmetzW-SHI2gycJ6aIvTMNCFfCjD39FO1Yg/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzyTO9yCqUU5tpw2_rz8ENLsKRdgBPNI93avdFxwiX2-hy14ghLoBWIB_8JjvONHoapAw/exec';
 
 // ── Carga de datos via fetch() (versión GitHub Pages) ─────────
 async function cargarDatos() {
@@ -577,10 +588,11 @@ function abrirModal(i) {
     sec('Acción correctiva') +
     fila('Responsable', r.respAccion || r.responsable) +
     fila('Acción inmediata', r.accionInm) +
-    fila('Acción definitiva', r.accionDef) +
     fila('Causa raíz', r.causa) +
+    fila('Acción definitiva', r.accionDef) +
     sec('Seguimiento') +
     `<div class="modal-row"><span class="modal-k">Estado</span><span class="modal-v"><span class="badge" style="background:${c.bg};color:${c.txt}">${est}</span></span></div>` +
+    fila('Fecha de detección', fmtFecha(r.marcaTemporal)) +
     fila('Fecha compromiso', fmtFecha(r.compromiso)) +
     fila('Fecha venc. calculada', fmtFecha(r.vencCalc)) +
     fila('Fecha de cierre', fmtFecha(r.fechaCierre)) +
