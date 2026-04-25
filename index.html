@@ -280,22 +280,18 @@ const defEst = { bg:'#F1EFE8', txt:'#5F5E5A', bar:'#888780' };
 const PRIO   = { 'Alta':'#E24B4A', 'Media':'#EF9F27', 'Baja':'#639922' };
 
 // ── Helpers ───────────────────────────────────────────────────
-// Días a mostrar: si está cerrada usa diasCierre (col T) o calcula desde fechaCierre
+// Días a mostrar: siempre usa col T (diasCierre) del Sheet
+// La fórmula del sheet ya maneja ambos casos:
+//   - Abierta:  =ENTERO(HOY()-ENTERO(A2))
+//   - Cerrada:  =ENTERO(ENTERO(R2)-ENTERO(A2))
 function calcDias(r) {
-  const est = calcEstado(r);
-  if (est === 'Cerrada') {
-    // Primero intentar diasCierre (col T)
-    if (r.diasCierre && r.diasCierre > 0) return { dias: r.diasCierre, label: 'Días al cierre' };
-    // Si no, calcular desde fechaCierre (col R) si existe
-    const fc = parseISO(r.fechaCierre);
-    if (fc) {
-      // También necesitamos la fecha de detección — la calculamos desde diasAbierto como proxy
-      // o usamos fechaCierre - diasAbierto aprox. Mejor: dejamos col T con la fórmula del sheet.
-      // Fallback: mostrar diasAbierto con etiqueta correcta
-      return { dias: Math.round(r.diasAbierto), label: 'Días al cierre' };
-    }
-  }
-  return { dias: Math.round(r.diasAbierto), label: 'Días abierto' };
+  const est   = calcEstado(r);
+  const label = est === 'Cerrada' ? 'Días al cierre' : 'Días abierto';
+  // Usar diasCierre (col T) si tiene valor, sino diasAbierto como fallback
+  const dias  = (r.diasCierre !== null && r.diasCierre !== undefined && r.diasCierre >= 0)
+                  ? r.diasCierre
+                  : Math.round(r.diasAbierto);
+  return { dias, label };
 }
 const hoy = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
 const parseISO = s => { if (!s) return null; const d = new Date(s); d.setHours(0,0,0,0); return isNaN(d)?null:d; };
@@ -318,7 +314,7 @@ function calcPct(r) {
 
 // ── CONFIGURACIÓN ────────────────────────────────────────────
 // Pegá acá la URL de tu Web App de Apps Script
-const API_URL = 'https://script.google.com/macros/s/AKfycbzyTO9yCqUU5tpw2_rz8ENLsKRdgBPNI93avdFxwiX2-hy14ghLoBWIB_8JjvONHoapAw/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwdy61rkuAKhZFWu9BB5RGmchn4rCI0eJ57gW9VEIRgJymSZUsKoa_Dd-nBGy-AR9WKKQ/exec';
 
 // ── Carga de datos via fetch() (versión GitHub Pages) ─────────
 async function cargarDatos() {
@@ -583,7 +579,7 @@ function abrirModal(i) {
     fila('Área', r.area) +
     fila('Tipo', r.tipo) +
     fila('Prioridad', r.prioridad) +
-    fila(calcDias(r).label === 'días al cierre' ? 'Días al cierre' : 'Días abierto', calcDias(r).dias) +
+    fila(calcDias(r).label, calcDias(r).dias) +
     (r.comentarios ? `<div class="modal-row"><span class="modal-k">Comentarios adicionales</span><span class="modal-v" style="color:var(--txt2);font-style:italic">${r.comentarios}</span></div>` : '') +
     sec('Acción correctiva') +
     fila('Responsable', r.respAccion || r.responsable) +
