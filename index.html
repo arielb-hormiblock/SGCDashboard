@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SGC · Planes de Trabajo</title>
+<script>
+// Aplica el tema ANTES de pintar la página para evitar parpadeo (FOUC)
+(function(){
+  var t = localStorage.getItem('sgc-theme');
+  if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 /* ── Variables — editá solo este bloque para cambiar el diseño ── */
@@ -31,9 +39,29 @@
   --p-baja:   #639922;
 }
 
+/* ── Modo oscuro ──────────────────────────────────────────── */
+:root[data-theme="dark"] {
+  --bg:        #17181b;
+  --bg2:       #1e1f23;
+  --bg3:       #26272c;
+  --txt:       #eae8e3;
+  --txt2:      #a9a69f;
+  --txt3:      #726f68;
+  --border:    rgba(255,255,255,0.10);
+  --accent:    #5B9FE8;
+
+  --c-gestion-bg:  rgba(29,158,117,0.18);  --c-gestion-txt:  #5FE3B7; --c-gestion:  #2FBE8F;
+  --c-abierta-bg:  rgba(55,138,221,0.18);  --c-abierta-txt:  #7BBBF5; --c-abierta:  #4A9EE8;
+  --c-porvencer-bg:rgba(239,159,39,0.20);  --c-porvencer-txt:#F5B84D; --c-porvencer:#EF9F27;
+  --c-vencida-bg:  rgba(226,75,74,0.20);   --c-vencida-txt:  #F58482; --c-vencida:  #E24B4A;
+  --c-cerrada-bg:  rgba(99,153,34,0.20);   --c-cerrada-txt:  #A4D96B; --c-cerrada:  #7CB342;
+  --c-sinac-bg:    rgba(136,135,128,0.20); --c-sinac-txt:    #C2C0B8; --c-sinac:    #888780;
+}
+:root[data-theme="dark"] mark { background:#7a5b00; color:#fff; }
+
 /* ── Reset y base ─────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg2); color: var(--txt); font-size: 14px; min-height: 100vh; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg2); color: var(--txt); font-size: 14px; min-height: 100vh; transition: background .15s, color .15s; }
 
 /* ── Header ───────────────────────────────────────────────── */
 header {
@@ -48,10 +76,11 @@ header {
 }
 .logo { font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 10px; }
 .logo-badge { background: var(--c-gestion-bg); color: var(--c-gestion-txt); font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 10px; }
-.header-right { display: flex; align-items: center; gap: 10px; }
-#sync-info { font-size: 11px; color: var(--txt3); }
+.header-right { display: flex; align-items: center; gap: 8px; }
+#sync-info { font-size: 11px; color: var(--txt3); margin-right: 4px; }
 .btn { font-size: 12px; padding: 5px 12px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--txt2); cursor: pointer; transition: background .12s; white-space: nowrap; }
 .btn:hover { background: var(--bg2); }
+.btn-icon { padding: 5px 9px; font-size: 14px; line-height: 1; }
 .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
 .btn-primary:hover { opacity: .88; }
 
@@ -142,7 +171,7 @@ mark { background: #FFE699; color: inherit; border-radius: 2px; padding: 0 1px; 
 .empty-msg { text-align: center; padding: 36px; color: var(--txt3); font-size: 13px; }
 
 /* ── Modal ────────────────────────────────────────────────── */
-.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.38); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
 .overlay.open { display: flex; }
 .modal {
   background: var(--bg); border-radius: var(--radius-lg);
@@ -166,14 +195,44 @@ mark { background: #FFE699; color: inherit; border-radius: 2px; padding: 0 1px; 
   main { padding: 12px 10px 32px; }
   .charts { grid-template-columns: 1fr; }
   .chart-wrap { height: 180px; }
+  .chart-card.full { grid-column: 1 / -1; }
 }
 .charts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
 .chart-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; }
+.chart-card.full { grid-column: 1 / -1; }
 .chart-title { font-size: 10px; font-weight: 500; color: var(--txt3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
 .chart-wrap { position: relative; height: 160px; }
+.chart-wrap.tall { height: 220px; }
+
+/* ── Encabezado solo para impresión / PDF ─────────────────── */
+#print-header { display: none; }
+
+/* ── Estilos de impresión (Exportar a PDF vía navegador) ────── */
+@media print {
+  header, .toolbar, .charts, .workload-card, .btn, .overlay { display: none !important; }
+  #print-header {
+    display: block !important; margin-bottom: 16px;
+    border-bottom: 2px solid #002F87; padding-bottom: 8px;
+  }
+  #print-header h2 { font-size: 16px; color: #002F87; margin-bottom: 4px; }
+  #print-header p { font-size: 11px; color: #444; }
+  body { background: #fff; color: #000; }
+  main { max-width: 100%; padding: 0; }
+  .table-card { border: none; }
+  table { min-width: 0; width: 100%; }
+  thead th { background: #eee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .badge { border: 1px solid #999; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bar-wrap { border: 1px solid #999; }
+  tbody tr { break-inside: avoid; }
+}
 </style>
 </head>
 <body>
+
+<div id="print-header">
+  <h2>SGC · Hormi-Block S.A. — Reporte de Planes de Trabajo</h2>
+  <p id="print-meta"></p>
+</div>
 
 <header>
   <div class="logo">
@@ -182,6 +241,9 @@ mark { background: #FFE699; color: inherit; border-radius: 2px; padding: 0 1px; 
   </div>
   <div class="header-right">
     <span id="sync-info">Cargando…</span>
+    <button class="btn btn-icon" id="theme-toggle" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
+    <button class="btn" onclick="exportCSV()" title="Descargar la vista filtrada en CSV">⬇ CSV</button>
+    <button class="btn" onclick="exportPDF()" title="Imprimir / Guardar como PDF">🖨 PDF</button>
     <button class="btn" onclick="cargarDatos()">↻ Actualizar</button>
   </div>
 </header>
@@ -213,6 +275,10 @@ mark { background: #FFE699; color: inherit; border-radius: 2px; padding: 0 1px; 
     <div class="chart-card">
       <div class="chart-title">Por área</div>
       <div class="chart-wrap"><canvas id="chartArea"></canvas></div>
+    </div>
+    <div class="chart-card full">
+      <div class="chart-title">Tendencia mensual — creados vs. cerrados (últimos 6 meses)</div>
+      <div class="chart-wrap tall"><canvas id="chartTrend"></canvas></div>
     </div>
   </div>
 
@@ -311,7 +377,6 @@ const EST = {
 const defEst = { bg:'#F1EFE8', txt:'#5F5E5A', bar:'#888780' };
 const PRIO   = { 'Alta':'#E24B4A', 'Media':'#EF9F27', 'Baja':'#639922' };
 
-// Ventana (en días) para considerar un hallazgo "Por vencer"
 const DIAS_POR_VENCER = 5;
 
 // ── Helpers ───────────────────────────────────────────────────
@@ -327,7 +392,6 @@ const hoy = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
 const parseISO = s => { if (!s) return null; const d = new Date(s); d.setHours(0,0,0,0); return isNaN(d)?null:d; };
 const fmtFecha = s => { const d = parseISO(s); if (!d) return '—'; return d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}); };
 
-// ── calcEstado — ahora con estado intermedio "Por vencer" ─────
 function calcEstado(r) {
   if (r.estado === 'Cerrada') return 'Cerrada';
   const v = parseISO(r.vencCalc);
@@ -358,10 +422,68 @@ function highlight(str, term) {
   if (!term) return safe;
   const t = term.trim();
   if (!t) return safe;
-  // Escapar caracteres especiales de regex en el término buscado
   const escTerm = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const re = new RegExp('(' + escTerm + ')', 'ig');
   return safe.replace(re, '<mark>$1</mark>');
+}
+
+// ── Modo oscuro ─────────────────────────────────────────────
+function isDarkMode() {
+  return document.documentElement.getAttribute('data-theme') === 'dark';
+}
+function updateThemeButton() {
+  document.getElementById('theme-toggle').textContent = isDarkMode() ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  const next = isDarkMode() ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('sgc-theme', next);
+  updateThemeButton();
+  if (window._data) renderCharts(window._data);
+}
+
+// ── Exportar CSV ──────────────────────────────────────────────
+function exportCSV() {
+  const data = window._data || [];
+  if (!data.length) { alert('No hay datos para exportar con los filtros actuales.'); return; }
+  const headers = ['ID','Área','Responsable','Tipo','Estado','Prioridad','Fecha compromiso','Fecha venc. calculada','Días','Situación'];
+  const csvEscape = v => {
+    const s = String(v ?? '');
+    return /[",\n;]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+  };
+  const rows = data.map(r => [
+    r.id, r.area, (r.respAccion || r.responsable || ''), r.tipo, calcEstado(r), r.prioridad,
+    fmtFecha(r.compromiso), fmtFecha(r.vencCalc), calcDias(r).dias, (r.situacion || '').replace(/\r?\n/g,' ')
+  ]);
+  const lines = [headers, ...rows].map(row => row.map(csvEscape).join(','));
+  const csvContent = '\uFEFF' + lines.join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const fecha = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = 'SGC_hallazgos_' + fecha + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ── Exportar PDF (impresión del navegador con vista impresa) ──
+function exportPDF() {
+  const data = window._data || [];
+  const meta = [];
+  const fA = document.getElementById('fArea').value;   if (fA) meta.push('Área: ' + fA);
+  const fT = document.getElementById('fTipo').value;   if (fT) meta.push('Tipo: ' + fT);
+  const fE = document.getElementById('fEstado').value; if (fE) meta.push('Estado: ' + fE);
+  const fP = document.getElementById('fPrio').value;   if (fP) meta.push('Prioridad: ' + fP);
+  const fB = document.getElementById('fBuscar').value; if (fB) meta.push('Búsqueda: "' + fB + '"');
+  const now = new Date().toLocaleString('es-AR');
+  document.getElementById('print-meta').textContent =
+    'Generado: ' + now +
+    (meta.length ? ' — Filtros: ' + meta.join(', ') : ' — Sin filtros aplicados') +
+    ' — Total: ' + data.length + ' registro' + (data.length !== 1 ? 's' : '');
+  window.print();
 }
 
 // ── CONFIGURACIÓN ────────────────────────────────────────────
@@ -440,7 +562,6 @@ function renderWorkload(data) {
   const card = document.getElementById('workload-card');
   const list = document.getElementById('workload-list');
 
-  // Solo cuenta hallazgos NO cerrados
   const abiertos = data.filter(r => calcEstado(r) !== 'Cerrada');
   const counts = {};
   abiertos.forEach(r => {
@@ -476,7 +597,6 @@ function render() {
     return va < vb ? -sortDir : va > vb ? sortDir : 0;
   });
 
-  // Stats
   const cnt = est => data.filter(r => calcEstado(r) === est).length;
   document.getElementById('stats').innerHTML = [
     { n: data.length,       l: 'Total',       c: 'var(--txt)'           },
@@ -487,10 +607,8 @@ function render() {
     { n: cnt('Cerrada'),    l: 'Cerradas',    c: 'var(--c-cerrada-txt)' },
   ].map(s => `<div class="stat"><div class="stat-n" style="color:${s.c}">${s.n}</div><div class="stat-l">${s.l}</div></div>`).join('');
 
-  // Panel de carga por responsable (se calcula sobre el set filtrado)
   renderWorkload(data);
 
-  // Filas
   const maxDias = Math.max(...data.map(r => calcDias(r).dias), 1);
   document.getElementById('empty').style.display = data.length ? 'none' : 'block';
   document.getElementById('tbody').innerHTML = data.map((r, i) => {
@@ -531,13 +649,31 @@ function render() {
 // ── Gráficos ──────────────────────────────────────────────────
 let _charts = {};
 
+function buildTrend(data) {
+  const now = new Date();
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    months.push(new Date(now.getFullYear(), now.getMonth() - i, 1));
+  }
+  const labels = months.map(d => d.toLocaleDateString('es-AR', { month: 'short', year: '2-digit' }));
+  const creados = months.map(m => data.filter(r => {
+    const d = parseISO(r.marcaTemporal);
+    return d && d.getFullYear() === m.getFullYear() && d.getMonth() === m.getMonth();
+  }).length);
+  const cerrados = months.map(m => data.filter(r => {
+    const d = parseISO(r.fechaCierre);
+    return d && d.getFullYear() === m.getFullYear() && d.getMonth() === m.getMonth();
+  }).length);
+  return { labels, creados, cerrados };
+}
+
 function renderCharts(data) {
   if (!data.length) { document.getElementById('charts').style.display = 'none'; return; }
   document.getElementById('charts').style.display = 'grid';
 
-  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const txtColor  = isDark ? '#c2c0b6' : '#6b6a64';
-  const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+  const dark = isDarkMode();
+  const txtColor  = dark ? '#c2c0b6' : '#6b6a64';
+  const gridColor = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
 
   // ── 1. Por estado ─────────────────────────────────────────
   const estados = ['En gestión','Abierta','Por vencer','Vencida','Cerrada','Sin Acción'];
@@ -561,6 +697,13 @@ function renderCharts(data) {
   const areaColors = ['#534AB7','#1D9E75','#378ADD','#E24B4A','#EF9F27','#639922','#D85A30','#888780','#3C3489'];
 
   dibujarBarras('chartArea', areaLabels, areaVals, areaColors, txtColor, gridColor);
+
+  // ── 4. Tendencia mensual ──────────────────────────────────
+  const trend = buildTrend(data);
+  dibujarLineas('chartTrend', trend.labels, [
+    { label: 'Creados',  data: trend.creados,  borderColor: '#378ADD', backgroundColor: 'rgba(55,138,221,0.15)', tension: 0.3, fill: true, pointRadius: 3 },
+    { label: 'Cerrados', data: trend.cerrados, borderColor: '#639922', backgroundColor: 'rgba(99,153,34,0.15)',  tension: 0.3, fill: true, pointRadius: 3 }
+  ], txtColor, gridColor);
 }
 
 function dibujarDona(id, labels, data, colors, txtColor) {
@@ -644,6 +787,27 @@ function dibujarBarras(id, labels, data, colors, txtColor, gridColor) {
   });
 }
 
+function dibujarLineas(id, labels, datasets, txtColor, gridColor) {
+  if (_charts[id]) { _charts[id].destroy(); }
+  const ctx = document.getElementById(id).getContext('2d');
+  _charts[id] = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'bottom', labels: { color: txtColor, font: { size: 11 }, boxWidth: 10, padding: 8 } },
+        tooltip: { mode: 'index', intersect: false }
+      },
+      scales: {
+        x: { ticks: { color: txtColor, font: { size: 10 } }, grid: { color: gridColor }, border: { display: false } },
+        y: { beginAtZero: true, ticks: { color: txtColor, font: { size: 10 }, stepSize: 1 }, grid: { color: gridColor }, border: { display: false } }
+      }
+    }
+  });
+}
+
 // ── Modal ─────────────────────────────────────────────────────
 function abrirModal(i) {
   const r   = window._data[i];
@@ -692,6 +856,7 @@ function cerrarModal(e) {
 }
 
 // ── Inicio y auto-refresh ─────────────────────────────────────
+updateThemeButton();
 cargarDatos();
 setInterval(cargarDatos, 5 * 60 * 1000);
 </script>
