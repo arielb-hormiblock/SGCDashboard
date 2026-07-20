@@ -149,9 +149,10 @@ tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background: var(--bg2); }
 td { padding: 9px 12px; vertical-align: middle; }
 
-.cell-id   { font-size: 11px; font-weight: 500; color: var(--txt2); white-space: nowrap; }
+.cell-id   { font-size: 11px; font-weight: 500; color: var(--txt2); white-space: nowrap; display: flex; align-items: center; gap: 5px; }
 .cell-area { font-size: 11px; max-width: 145px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cell-resp { font-size: 12px; white-space: nowrap; }
+.clip-icon { font-size: 11px; opacity: .65; flex-shrink: 0; }
 
 mark { background: #FFE699; color: inherit; border-radius: 2px; padding: 0 1px; }
 
@@ -619,8 +620,9 @@ function render() {
     const { dias: diasMostrar } = calcDias(r);
     const dPct  = Math.round(diasMostrar / maxDias * 100);
     const barTxt= pct > 55 ? '#fff' : c.bar;
+    const clip  = r.adjunto ? '<span class="clip-icon" title="Tiene archivo adjunto">📎</span>' : '';
     return `<tr onclick="abrirModal(${i})">
-      <td class="cell-id">${highlight(r.id, term)}</td>
+      <td class="cell-id">${highlight(r.id, term)}${clip}</td>
       <td class="cell-area" title="${escapeHtml(r.area)}">${escapeHtml(r.area)}</td>
       <td class="cell-resp">${highlight((r.responsable||'').split(' ').slice(0,2).join(' '), term)}</td>
       <td style="font-size:11px;color:var(--txt2);white-space:nowrap">${escapeHtml(r.tipo||'—')}</td>
@@ -845,6 +847,11 @@ function abrirModal(i) {
       ? `<div class="modal-row"><span class="modal-k">Evidencia</span><span class="modal-v"><a href="${r.evidencia}" target="_blank" rel="noopener">Abrir carpeta en Drive ↗</a></span></div>`
       : r.evidencia
         ? `<div class="modal-row"><span class="modal-k">Evidencia</span><span class="modal-v" style="color:var(--txt2)">${r.evidencia}</span></div>`
+        : '') +
+    (r.adjunto && r.adjunto.startsWith('http')
+      ? `<div class="modal-row"><span class="modal-k">Adjunto (Forms)</span><span class="modal-v"><a href="${r.adjunto}" target="_blank" rel="noopener">Ver archivo adjunto ↗</a></span></div>`
+      : r.adjunto
+        ? `<div class="modal-row"><span class="modal-k">Adjunto (Forms)</span><span class="modal-v" style="color:var(--txt2)">${r.adjunto}</span></div>`
         : '') +
     fila('Validación SGC', r.validacion) +
     fila('Observaciones', r.observ);
